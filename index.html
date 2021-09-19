@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Twitch Farts Bot</title>
+    <link rel="stylesheet" href="assets/css/bootstrap452.min.css">
+    <link rel="stylesheet" href="assets/css/dark.min.css">
+</head>
+<style>
+    .hide {
+        display: none;
+    }
+</style>
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col-10">
+            <h1 class="h3 pt-4 pl-lg-4 text-center">Twitch Chat Farts Bot</h1>
+        </div>
+        <div class="col-2 text-center">
+            <img src="assets/images/robot.gif" style="width: 60px;" alt="">
+        </div>
+    </div>
+    <br>
+    <div class="form-label-group mb-2">
+        <label for="mainAccount">Twitch Account</label>
+        <input type="text" id="mainAccount" class="form-control">
+    </div>
+    <div class="form-check">
+        <input class="form-check-input" type="checkbox" value="" id="modsonly">
+        <label class="form-check-label" for="modsonly">
+            Mods Only
+        </label>
+    </div>
+    <br>
+    <button class="btn btn-lg btn-success btn-block" id="generate_button" type="button">Generate Overlay Link</button>
+    <br>
+    <div id="overlaylink" class="hide"></div>
+</div>
+<script>
+    document.getElementById("generate_button").addEventListener("click", function (e) {
+        let mainAccount = document.getElementById("mainAccount").value;
+        let modsonly = document.getElementById("modsonly").checked;
+        if (!mainAccount) {
+            alert('Twitch username is not set');
+        }
+        //build overlay url
+        if (mainAccount) {
+            let srcURL = window.location.protocol + "//" + window.location.host + window.location.pathname;
+            let fullUrl = srcURL + "farts.html?channel=" + mainAccount + "&modsonly=" + modsonly;
+            document.getElementById("overlaylink").classList.remove("hide");
+            document.getElementById("overlaylink").innerHTML = "<p>Add this link as a browser source in OBS.<br>" +
+                "<a href='" + fullUrl + "' target='_blank'>" + fullUrl + "</a></p>";
+        }
+    });
+</script>
+</body>
+</html>

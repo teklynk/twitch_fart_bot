@@ -1,0 +1,9 @@
+body {
+    background: transparent;
+    margin: 0;
+    padding: 0;
+}
+
+#container audio {
+    display: none;
+}
