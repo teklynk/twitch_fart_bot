@@ -18,17 +18,16 @@ $(document).ready(function () {
 
     client.on('chat', (channel, user, message, self) => {
         //alert message
-        let isMod;
         if (user['message-type'] === 'chat') {
 
-            if (modsonly === 'true' && user.mod) {
+            if (modsonly === 'true' && (user.mod || user.username === channelName)) {
                 playSound(); //mods only
             } else if (modsonly === 'false') {
                 playSound(); //everyone
             }
 
             function playSound() {
-                if (message.startsWith("!fart") ) {
+                if (message.startsWith("!fart")) {
 
                     console.log(user.username + " just farted :)");
 
