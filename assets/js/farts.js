@@ -6,9 +6,16 @@ $(document).ready(function () {
         return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
     }
 
-    let botName = getUrlParameter('bot');
+    let coolDown = getUrlParameter('cooldown');
     let channelName = getUrlParameter('channel');
     let modsonly = getUrlParameter('modsonly');
+    let idleTime = 0;
+
+    let timer = setInterval(timeSleep, 1000); //seconds
+
+    function timeSleep() {
+        idleTime = idleTime + 1;
+    }
 
     const client = new tmi.Client({
         channels: [channelName]
@@ -17,29 +24,40 @@ $(document).ready(function () {
     client.connect().catch(console.error);
 
     client.on('chat', (channel, user, message, self) => {
+
         //alert message
         if (user['message-type'] === 'chat') {
 
             if (modsonly === 'true' && (user.mod || user.username === channelName)) {
                 playSound(); //mods only
-            } else if (modsonly === 'false') {
+            } else if (modsonly === 'false' || user.username === channelName) {
                 playSound(); //everyone
             }
 
             function playSound() {
+
                 if (message.startsWith("!fart")) {
 
-                    console.log(user.username + " just farted :)");
+                    if (idleTime >= coolDown) {
 
-                    let randomFart = Math.floor((Math.random() * 21) + 1);
+                        console.log(idleTime);
 
-                    let audioPlayer = "<audio autoplay><source src='./media/fart" + randomFart + ".mp3' type='audio/mpeg'></audio>";
+                        idleTime = 0;
+                        timer = 0;
+                        clearInterval(timer);
 
-                    $(audioPlayer).appendTo('#container');
+                        console.log(user.username + " just farted :)");
 
-                    $("#container audio").fadeIn(500).delay(5000).fadeOut(500, function () {
-                        $(this).remove();
-                    });
+                        let randomFart = Math.floor((Math.random() * 21) + 1);
+
+                        let audioPlayer = "<audio autoplay><source src='./media/fart" + randomFart + ".mp3' type='audio/mpeg'></audio>";
+
+                        $(audioPlayer).appendTo('#container');
+
+                        $("#container audio").fadeIn(500).delay(5000).fadeOut(500, function () {
+                            $(this).remove();
+                        });
+                    }
 
                 }
             }
