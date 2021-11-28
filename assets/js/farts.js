@@ -7,7 +7,7 @@ $(document).ready(function () {
     }
 
     let coolDown = getUrlParameter('cooldown');
-    let channelName = getUrlParameter('channel');
+    let channelName = getUrlParameter('channel').toLowerCase();
     let modsonly = getUrlParameter('modsonly');
     let idleTime = 0;
 
