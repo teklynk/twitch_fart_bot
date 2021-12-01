@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Twitch Farts Bot</title>
+    <script src="assets/js/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="assets/css/bootstrap452.min.css">
     <link rel="stylesheet" href="assets/css/dark.min.css">
     <link rel="apple-touch-icon" sizes="57x57" href="assets/images/apple-icon-57x57.png">
@@ -40,11 +41,12 @@
         <label for="mainAccount">Twitch Account</label>
         <input type="text" id="mainAccount" class="form-control">
     </div>
-    <div class="form-label-group mb-2">
+    <div class="form-label-group mb-2 range-slider">
         <label for="coolDown">Cool Down</label>
-        <input type="number" min="0" max="300" id="coolDown" class="form-control">
+        <input type="range" max="3600" min="1" step="1" class="form-control range-slider-range" id="coolDown"
+               value="5" style="height: 0;">
+        <small class="text-muted range-slider-value"></small><small class="text-muted range-slider-value">&nbsp;Seconds</small>
     </div>
-    <br>
     <div class="form-check">
         <input class="form-check-input" type="checkbox" value="" id="modsonly">
         <label class="form-check-label" for="modsonly">
@@ -57,21 +59,44 @@
     <div id="overlaylink" class="hide"></div>
 </div>
 <script>
-    document.getElementById("generate_button").addEventListener("click", function (e) {
-        let mainAccount = document.getElementById("mainAccount").value;
-        let coolDown = document.getElementById("coolDown").value;
-        let modsonly = document.getElementById("modsonly").checked;
-        if (!mainAccount) {
-            alert('Twitch username is not set');
-        }
-        //build overlay url
-        if (mainAccount) {
-            let srcURL = window.location.protocol + "//" + window.location.host + window.location.pathname;
-            let fullUrl = srcURL + "farts.html?channel=" + mainAccount.toLowerCase() + "&modsonly=" + modsonly + "&cooldown=" + coolDown;
-            document.getElementById("overlaylink").classList.remove("hide");
-            document.getElementById("overlaylink").innerHTML = "<p>Add this link as a browser source in OBS.<br>" +
-                "<a href='" + fullUrl + "' target='_blank'>" + fullUrl + "</a></p>";
-        }
+    $(document).ready(function () {
+        let rangeSlider = function rangeSlider() {
+            let slider = $('.range-slider'),
+                range = $('.range-slider-range'),
+                value = $('.range-slider-value');
+
+            slider.each(function () {
+
+                value.each(function () {
+                    let value = $(this).prev().attr('value');
+                    $(this).html(value);
+                });
+
+                range.on('input', function () {
+                    $(this).next(value).html(this.value);
+                });
+            });
+        };
+
+        rangeSlider();
+
+        document.getElementById("generate_button").addEventListener("click", function (e) {
+            let mainAccount = document.getElementById("mainAccount").value;
+            let coolDown = document.getElementById("coolDown").value;
+            coolDown = coolDown + '000'; // convert seconds to milliseconds
+            let modsonly = document.getElementById("modsonly").checked;
+            if (!mainAccount) {
+                alert('Twitch username is not set');
+            }
+            //build overlay url
+            if (mainAccount) {
+                let srcURL = window.location.protocol + "//" + window.location.host + window.location.pathname;
+                let fullUrl = srcURL + "farts.html?channel=" + mainAccount.toLowerCase() + "&modsonly=" + modsonly + "&cooldown=" + coolDown;
+                document.getElementById("overlaylink").classList.remove("hide");
+                document.getElementById("overlaylink").innerHTML = "<p>Add this link as a browser source in OBS.<br>" +
+                    "<a href='" + fullUrl + "' target='_blank'>" + fullUrl + "</a></p>";
+            }
+        });
     });
 </script>
 <div class="text-right m-4"><a class="btn btn-link" href="https://github.com/teklynk/twitch_fart_bot" target="_blank">Github</a></div>
