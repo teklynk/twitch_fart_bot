@@ -30,7 +30,7 @@ $(document).ready(function () {
 
             if (modsonly === 'true' && (user.mod || user.username === channelName)) {
                 playSound(); //mods only
-            } else if (modsonly === 'false' || user.username === channelName) {
+            } else if (modsonly === 'false') {
                 playSound(); //everyone
             }
 

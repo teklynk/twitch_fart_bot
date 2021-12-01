@@ -83,7 +83,6 @@
         document.getElementById("generate_button").addEventListener("click", function (e) {
             let mainAccount = document.getElementById("mainAccount").value;
             let coolDown = document.getElementById("coolDown").value;
-            coolDown = coolDown + '000'; // convert seconds to milliseconds
             let modsonly = document.getElementById("modsonly").checked;
             if (!mainAccount) {
                 alert('Twitch username is not set');
