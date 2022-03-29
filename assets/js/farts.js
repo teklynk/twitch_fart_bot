@@ -11,6 +11,7 @@ $(document).ready(function () {
     let modsonly = getUrlParameter('modsonly');
     let rotation = getUrlParameter('rotation');
     let animation = getUrlParameter('animation');
+    let size = getUrlParameter('size');
     let idleTime = 0;
     let audioDuration = 1;
     let numOfFiles = 21;
@@ -21,6 +22,10 @@ $(document).ready(function () {
 
     if (!animation) {
         animation = "0";
+    }
+
+    if (!size) {
+        size = "0";
     }
 
     let timer = setInterval(timeSleep, 1000); //seconds
@@ -47,8 +52,14 @@ $(document).ready(function () {
         idleTime = idleTime + 1;
     }
 
+    let customSize = "width: auto;";
+
+    if (size !== "0") {
+        customSize = "width: " + size + "px;"
+    }
+
     // create img element. dummy 1x1 pixel gif as a placeholder
-    let fartAnimation = "<img class='responsive' src='data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs%3D'>";
+    let fartAnimation = "<img class='responsive' style='"+customSize+"' src='data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs%3D'>";
     $(fartAnimation).appendTo('#container');
 
     if (rotation) {
