@@ -60,6 +60,10 @@
         <label for="mainAccount">Twitch Account</label>
         <input type="text" id="mainAccount" class="form-control">
     </div>
+    <div class="form-label-group mb-2">
+        <label for="command">Custom Command <small>(optional)</small></label>
+        <input type="text" id="command" class="form-control">
+    </div>
     <div class="form-label-group mb-2 range-slider">
         <label for="coolDown">Cool Down</label>
         <input type="range" max="3600" min="1" step="1" class="form-control range-slider-range" id="coolDown"
@@ -73,28 +77,33 @@
             <option value="0" selected>None</option>
             <option value="1">Cartoon Green 1</option>
             <option value="2">Cartoon Green 2</option>
-            <option value="3">Comic</option>
+            <option value="3">Comic Blast</option>
             <option value="4">Fast Smoke</option>
             <option value="5">Smoke Plume</option>
             <option value="6">Dark Cloud</option>
+            <option value="7">Green Vapor</option>
+            <option value="8">Grey Cloud</option>
+            <option value="9">Cartoon Grey 2</option>
+            <option value="10">Toot Swoop</option>
         </select>
     </div>
 
     <div class="form-label-group mb-2 range-slider">
         <label for="size">Image Size</label>
         <input type="range" max="1000" min="0" step="1" class="form-control range-slider-range" id="size"
-               value="0" style="height: 0;">
-        <small class="text-muted range-slider-value"></small><small class="text-muted range-slider-value">&nbsp;Pixels</small>
+               value="0" style="height: 0;" disabled>
+        <small class="text-muted range-slider-value size-value"></small><small class="text-muted range-slider-value">&nbsp;Pixels</small>
     </div>
 
     <div class="form-label-group mb-2 range-slider" style="z-index: 99;">
         <label for="rotation">Image Rotation</label>
         <input type="range" max="360" min="0" step="1" class="form-control range-slider-range" id="rotation"
-               value="0" style="height: 0;">
+               value="0" style="height: 0;" disabled>
         <small class="text-muted range-slider-value rotation-value"></small><small class="text-muted range-slider-value">&nbsp;degrees</small>
     </div>
-
-    <img id="img-preview" style="max-width: 100px; margin: 8px; display: none; transform: rotate(0deg);" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs%3D" alt="">
+<div class="form-group text-center">
+    <img id="img-preview" style="width: 100px; margin: 8px; display: none; transform: rotate(0deg); z-index: -1;" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs%3D" alt="">
+</div>
 
     <div class="form-check">
         <input class="form-check-input" type="checkbox" value="" id="modsonly">
@@ -111,7 +120,7 @@
     $(document).ready(function () {
 
         // Check if any input fields have changed
-        $(":text,textarea,:checkbox,input[type=range]").on('change', function (e) {
+        $(":text,textarea,:checkbox,input[type=range],select").on('change', function (e) {
             $("#overlaylink").addClass("hide");
         });
 
@@ -137,9 +146,16 @@
 
         $("#animation").on('change', function() {
             if ($(this).val() !== "0") {
-                $("#img-preview").css("display","block");
+                $("#size").removeAttr("disabled");
+                $("#rotation").removeAttr("disabled");
+                $("#img-preview").css("display","inline");
                 $("#img-preview").attr("src","./media/fart" + $(this).val() + "a.gif");
             } else {
+                $("#img-preview").css("width", "100px");
+                $("#size").attr("disabled","disabled");
+                $("#size").val("0");
+                $(".size-value").text("0");
+                $("#rotation").attr("disabled","disabled");
                 $("#rotation").val("0");
                 $(".rotation-value").text("0");
                 $("#img-preview").css("display","none");
@@ -149,9 +165,22 @@
 
         $("#rotation").on('change', function() {
             if ($(this).val() !== "0") {
-                $("#img-preview").css("display","block");
+                $("#img-preview").css("display","inline");
                 $("#img-preview").css("transform", "rotate(" + $(this).val() + "deg)");
                 $("#img-preview").attr("src","./media/fart" + $("#animation").val() + "a.gif");
+            } else {
+                $("#img-preview").css("display","inline");
+                $("#img-preview").css("transform", "rotate(0deg)");
+            }
+        })
+
+        $("#size").on('change', function() {
+            if ($(this).val() !== "0") {
+                $("#img-preview").css("display","inline");
+                $("#img-preview").css("width", $(this).val() + "px");
+            } else {
+                $("#img-preview").css("display","inline");
+                $("#img-preview").css("width", "100px");
             }
         })
 
@@ -161,6 +190,8 @@
             let animation = document.getElementById("animation").value;
             let rotation = document.getElementById("rotation").value;
             let size = document.getElementById("size").value;
+            let command = document.getElementById("command").value;
+            command = command.replace("!", "").trim();
             let modsonly = document.getElementById("modsonly").checked;
             if (!mainAccount) {
                 alert('Twitch username is not set');
@@ -168,7 +199,8 @@
             //build overlay url
             if (mainAccount) {
                 let srcURL = window.location.protocol + "//" + window.location.host + window.location.pathname;
-                let fullUrl = srcURL + "farts.html?channel=" + mainAccount.toLowerCase() + "&modsonly=" + modsonly + "&cooldown=" + coolDown + "&animation=" +animation+"&rotation="+rotation+"&size="+size;
+                let fullUrl = srcURL + "farts.html?channel=" + mainAccount.toLowerCase() + "&modsonly=" + modsonly + "&cooldown=" + coolDown + "&animation=" + animation+ "&rotation=" + rotation + "&size=" + size + "&command=" + command;
+                fullUrl = fullUrl.replace("index.htmlfarts.html", "farts.html");
                 document.getElementById("overlaylink").classList.remove("hide");
                 document.getElementById("overlaylink").innerHTML = "<p>Add this link as a browser source in OBS.<br>" +
                     "<a href='" + fullUrl + "' target='_blank'>" + fullUrl + "</a></p>";
@@ -176,7 +208,7 @@
         });
     });
 </script>
-<div class="text-right m-4"><a class="btn btn-link" href="https://github.com/teklynk/twitch_fart_bot" target="_blank">Github</a></div>
+<div class="text-right m-4"><a class="btn btn-link" href="https://github.com/teklynk/twitch_fart_bot/blob/main/README.md" target="_blank">Help</a><a class="btn btn-link" href="https://github.com/teklynk/twitch_fart_bot" target="_blank">Github</a><a class="btn btn-link" href="https://github.com/teklynk/twitch_fart_bot/archive/refs/heads/main.zip" target="_self">Download</a></div>
 
 <script>
     // Json data - Ajax call

@@ -11,6 +11,7 @@ $(document).ready(function () {
     let modsonly = getUrlParameter('modsonly');
     let rotation = getUrlParameter('rotation');
     let animation = getUrlParameter('animation');
+    let command = getUrlParameter('command');
     let size = getUrlParameter('size');
     let idleTime = 0;
     let audioDuration = 1;
@@ -18,6 +19,10 @@ $(document).ready(function () {
 
     if (!rotation) {
         rotation = "0";
+    }
+
+    if (!command) {
+        command = "fart";
     }
 
     if (!animation) {
@@ -28,20 +33,22 @@ $(document).ready(function () {
         size = "0";
     }
 
-    let timer = setInterval(timeSleep, 1000); //seconds
+    let customSize = "width: auto;";
 
-    function loadSounds() {
-        let audioElements = "";
-
-        for (let i = 1; i <= numOfFiles; i++) {
-          audioElements += "<audio id='audio-" + i + "' preload='auto'><source src='./media/fart" + i + ".mp3' type='audio/mpeg'></audio>";
-        }
-
-        $(audioElements).appendTo('#container');
+    if (size !== "0") {
+        customSize = "width: " + size + "px;"
     }
 
+    let timer = setInterval(timeSleep, 1000); //seconds
+
     // Preload all sound files
-    loadSounds();
+    let audioElements = "";
+
+    for (let i = 1; i <= numOfFiles; i++) {
+      audioElements += "<audio id='audio-" + i + "' preload='auto'><source src='./media/fart" + i + ".mp3' type='audio/mpeg'></audio>";
+    }
+
+    $(audioElements).appendTo('#container');
 
     function play(item) {
         let audioPlay = document.getElementById("audio-" + item);
@@ -52,14 +59,8 @@ $(document).ready(function () {
         idleTime = idleTime + 1;
     }
 
-    let customSize = "width: auto;";
-
-    if (size !== "0") {
-        customSize = "width: " + size + "px;"
-    }
-
     // create img element. dummy 1x1 pixel gif as a placeholder
-    let fartAnimation = "<img class='responsive' style='"+customSize+"' src='data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs%3D'>";
+    let fartAnimation = "<img style='" + customSize + "' src='data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs%3D'>";
     $(fartAnimation).appendTo('#container');
 
     if (rotation) {
@@ -75,7 +76,6 @@ $(document).ready(function () {
 
     client.on('chat', (channel, user, message, self) => {
 
-        
         if (user['message-type'] === 'chat') {
 
             if (modsonly === 'true' && (user.mod || user.username === channelName)) {
@@ -109,7 +109,7 @@ $(document).ready(function () {
 
             function playSound() {
 
-                if (message.startsWith("!fart")) {
+                if (message.startsWith("!" + command.trim())) {
 
                     if (user.username === channelName){
                         createSound(); //streamer only - no cooldown. plays on demand
@@ -121,5 +121,6 @@ $(document).ready(function () {
             }
 
         }
+
     });
 });
