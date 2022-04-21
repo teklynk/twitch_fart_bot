@@ -13,6 +13,7 @@ $(document).ready(function () {
     let animation = getUrlParameter('animation');
     let command = getUrlParameter('command');
     let size = getUrlParameter('size');
+    let sound = getUrlParameter('sound');
     let idleTime = 0;
     let audioDuration = 1;
     let numOfFiles = 21;
@@ -89,13 +90,19 @@ $(document).ready(function () {
                 timer = 0;
                 clearInterval(timer);
 
-                let randomFart = Math.floor((Math.random() * numOfFiles) + 1);
+                let soundFart;
 
-                let audio = $("#audio-" + randomFart)[0];
+                if (sound) {
+                    soundFart = sound;
+                } else {
+                    soundFart = Math.floor((Math.random() * numOfFiles) + 1);
+                }
+
+                let audio = $("#audio-" + soundFart)[0];
 
                 let audioDuration = audio.duration;
 
-                play(randomFart);
+                play(soundFart);
 
                 if (animation !== "0") {
                     $("#container img").attr("src","./media/fart" + animation + ".gif");
