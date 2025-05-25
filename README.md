@@ -16,4 +16,4 @@ cooldown=seconds (ie: 60)
 sound=1-21 (play a specific sound and not just a random sound)
 
 ## Try it
-[https://twitch-fart-bot.pages.dev/](https://twitch-fart-bot.pages.dev/)
+[https://twitch-fart-bot.teklynk.com](https://twitch-fart-bot.teklynk.com)
