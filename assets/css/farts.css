@@ -14,3 +14,15 @@ audio {
     height: auto;
 }
 
+.hide {
+    display: none;
+}
+
+.img-thumbnail {
+    padding: 0.25rem;
+    background-color: transparent;
+    border: none;
+    border-radius: 0;
+    max-width: 100%;
+    height: auto;
+}

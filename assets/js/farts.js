@@ -1,133 +1,102 @@
 $(document).ready(function () {
-    function getUrlParameter(name) {
-        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
-        let regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
-        let results = regex.exec(location.search);
-        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    const urlParams = new URLSearchParams(window.location.search);
+
+    const coolDown = (parseInt(urlParams.get('cooldown'), 10) || 5) * 1000; // in ms
+    const channelName = (urlParams.get('channel') || '').toLowerCase();
+    const modsOnly = urlParams.get('modsonly') === 'true';
+    const rotation = urlParams.get('rotation') || '0';
+    const animation = urlParams.get('animation') || '0';
+    const command = (urlParams.get('command') || 'fart').trim().toLowerCase();
+    const size = urlParams.get('size') || '0';
+    const sound = urlParams.get('sound');
+    const numOfFiles = 21;
+
+    if (!channelName) {
+        $('#container').html('<p style="color: red; font-family: sans-serif;">Error: Twitch channel not specified. Please add ?channel=your_channel_name to the URL.</p>');
+        return;
     }
 
-    let coolDown = getUrlParameter('cooldown');
-    let channelName = getUrlParameter('channel').toLowerCase();
-    let modsonly = getUrlParameter('modsonly');
-    let rotation = getUrlParameter('rotation');
-    let animation = getUrlParameter('animation');
-    let command = getUrlParameter('command');
-    let size = getUrlParameter('size');
-    let sound = getUrlParameter('sound');
-    let idleTime = 0;
-    let audioDuration = 1;
-    let numOfFiles = 21;
-
-    if (!rotation) {
-        rotation = "0";
-    }
-
-    if (!command) {
-        command = "fart";
-    }
-
-    if (!animation) {
-        animation = "0";
-    }
-
-    if (!size) {
-        size = "0";
-    }
+    let lastFartTimestamp = 0;
 
     let customSize = "width: auto;";
-
+    
     if (size !== "0") {
-        customSize = "width: " + size + "px;"
+        customSize = `width: ${size}px;`;
     }
-
-    let timer = setInterval(timeSleep, 1000); //seconds
 
     // Preload all sound files
-    let audioElements = "";
-
     for (let i = 1; i <= numOfFiles; i++) {
-      audioElements += "<audio id='audio-" + i + "' preload='auto'><source src='./media/fart" + i + ".mp3' type='audio/mpeg'></audio>";
-    }
-
-    $(audioElements).appendTo('#container');
-
-    function play(item) {
-        let audioPlay = document.getElementById("audio-" + item);
-        audioPlay.play();
-    }
-
-    function timeSleep() {
-        idleTime = idleTime + 1;
+        $("<audio>", {
+            id: `audio-${i}`,
+            preload: "auto"
+        }).append(`<source src="./media/fart${i}.mp3" type="audio/mpeg">`).appendTo('#container');
     }
 
     // create img element. dummy 1x1 pixel gif as a placeholder
-    let fartAnimation = "<img style='" + customSize + "' src='data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs%3D'>";
-    $(fartAnimation).appendTo('#container');
+    const $fartImage = $("<img>", {
+        src: 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs%3D',
+        style: customSize
+    }).css("transform", `rotate(${rotation}deg)`).appendTo('#container');
 
-    if (rotation) {
-        $("img").css("transform", "rotate(" + rotation + "deg)");
+    function createSound() {
+        lastFartTimestamp = Date.now();
+
+        let soundFart;
+
+        if (sound) {
+            soundFart = sound;
+        } else {
+            soundFart = Math.floor((Math.random() * numOfFiles) + 1);
+        }
+
+        let audio = $("#audio-" + soundFart)[0];
+        audio.play();
+
+        let audioDuration = (audio.duration || 1) * 1000;
+
+        if (animation !== "0") {
+            $fartImage.attr("src", `./media/fart${animation}.gif`);
+
+            $fartImage.fadeIn(100).delay(audioDuration).fadeOut(500, function () {
+                // dummy 1x1 pixel gif as a placeholder
+                $(this).attr("src", "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs%3D");
+            });
+        }
     }
 
-    // load TMI js
+    // Connect to Twitch chat using TMIjs
     const client = new tmi.Client({
+        options: {
+            debug: true,
+            skipUpdatingEmotesets: true
+        },
+        connection: {
+            reconnect: true,
+            maxReconnectAttempts: 3
+        },
         channels: [channelName]
     });
 
-    client.connect().catch(console.error);
+    client.connect().catch((err) => {
+        console.error(err);
+    });
+
+    client.on("maxreconnect", () => {
+        $("<div class='msg-error'>Failed to connect to Twitch Chat. Please refresh to try again. Twitch Access Token may have also expired.</div>").prependTo('body');
+    });
 
     client.on('chat', (channel, user, message, self) => {
+        if (self || user['message-type'] !== 'chat') return;
 
-        if (user['message-type'] === 'chat') {
+        if (message.toLowerCase().startsWith("!" + command)) {
+            const isStreamer = user.username.toLowerCase() === channelName;
+            const isMod = user.mod;
+            const canFart = !modsOnly || isMod || isStreamer;
+            const isOnCooldown = (Date.now() - lastFartTimestamp) < coolDown;
 
-            if (modsonly === 'true' && (user.mod || user.username === channelName)) {
-                playSound(); //mods only
-            } else if (modsonly === 'false') {
-                playSound(); //everyone
+            if (canFart && (isStreamer || !isOnCooldown)) {
+                createSound();
             }
-
-            function createSound(){
-                idleTime = 0;
-                timer = 0;
-                clearInterval(timer);
-
-                let soundFart;
-
-                if (sound) {
-                    soundFart = sound;
-                } else {
-                    soundFart = Math.floor((Math.random() * numOfFiles) + 1);
-                }
-
-                let audio = $("#audio-" + soundFart)[0];
-
-                let audioDuration = audio.duration;
-
-                play(soundFart);
-
-                if (animation !== "0") {
-                    $("#container img").attr("src","./media/fart" + animation + ".gif");
-
-                    $("#container img").fadeIn(100).delay(audioDuration.toFixed(1) * 1000).fadeOut(500, function () {
-                        // dummy 1x1 pixel gif as a placeholder
-                        $(this).attr("src","data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs%3D");
-                    });
-                }
-            }
-
-            function playSound() {
-
-                if (message.startsWith("!" + command.trim())) {
-
-                    if (user.username === channelName){
-                        createSound(); //streamer only - no cooldown. plays on demand
-                    } else if(idleTime >= parseInt(coolDown)) {
-                        createSound(); //cooldown for everyone else including mods
-                    }
-
-                }
-            }
-
         }
-
     });
 });
